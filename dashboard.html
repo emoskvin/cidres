@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Сидерии Ленинградской области — Дашборд</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* ── Tokens ─────────────────────────────────────────────────── */
+:root {
+  --bg:      #F1EFEA;
+  --surf:    #FFFFFF;
+  --surf2:   #F7F6F2;
+  --fg:      #1B1916;
+  --fg2:     #58544F;
+  --fg3:     #9A958F;
+  --green:   #1A5012;
+  --gmid:    #3A8430;
+  --glight:  #E2EFDF;
+  --amber:   #7A520A;
+  --alight:  #F5EBD5;
+  --rule:    #DDD9D2;
+  --shadow:  0 1px 3px rgba(0,0,0,.07),0 4px 14px rgba(0,0,0,.05);
+  --r:       10px;
+  --fd:      'Playfair Display', Georgia, serif;
+  --fb:      'Inter', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#131210; --surf:#1D1C19; --surf2:#252320; --fg:#EDE9E2; --fg2:#A09B95; --fg3:#6A6560;
+    --green:#72D462; --gmid:#4A9040; --glight:#152412;
+    --amber:#D49028; --alight:#2A1D08;
+    --rule:#2E2C28; --shadow:0 1px 3px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#131210; --surf:#1D1C19; --surf2:#252320; --fg:#EDE9E2; --fg2:#A09B95; --fg3:#6A6560;
+  --green:#72D462; --gmid:#4A9040; --glight:#152412;
+  --amber:#D49028; --alight:#2A1D08;
+  --rule:#2E2C28; --shadow:0 1px 3px rgba(0,0,0,.35),0 4px 14px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+
+/* ── Reset ───────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fb);font-size:14px;line-height:1.6;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+
+/* ── Hero ────────────────────────────────────────────────────── */
+.hero{
+  background:var(--green);
+  color:#EEF7EC;
+  padding:2.8rem 2rem 2.2rem;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:1.5rem;
+  align-items:start;
+}
+.hero-left .eye{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:.4rem}
+.hero-left h1{font-family:var(--fd);font-size:clamp(1.7rem,4.5vw,2.8rem);font-weight:700;line-height:1.1;text-wrap:balance;margin-bottom:.5rem}
+.hero-left p{font-size:13px;opacity:.7;max-width:50ch}
+.hero-badges{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.1rem}
+.hero-badge{background:rgba(255,255,255,.13);border-radius:4px;padding:.2rem .55rem;font-size:11.5px;font-weight:600;letter-spacing:.03em}
+.theme-btn{background:rgba(255,255,255,.13);border:none;color:#EEF7EC;border-radius:6px;padding:.45rem .7rem;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap;align-self:start;margin-top:.2rem}
+.theme-btn:hover{background:rgba(255,255,255,.22)}
+
+/* ── KPI row ─────────────────────────────────────────────────── */
+.kpi-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1rem;
+  padding:1.5rem 2rem 0;
+  max-width:1200px;
+  margin:0 auto;
+}
+.kpi{background:var(--surf);border-radius:var(--r);box-shadow:var(--shadow);padding:1.1rem 1.3rem;display:flex;flex-direction:column;gap:.25rem}
+.kpi-icon{font-size:1.4rem;line-height:1}
+.kpi-val{font-family:var(--fd);font-size:2rem;font-weight:700;color:var(--green);line-height:1}
+.kpi-label{font-size:12px;color:var(--fg2);font-weight:500}
+
+/* ── Charts row ──────────────────────────────────────────────── */
+.charts-row{
+  display:grid;
+  grid-template-columns:1fr 1.35fr;
+  gap:1rem;
+  padding:1rem 2rem 0;
+  max-width:1200px;
+  margin:0 auto;
+}
+.chart-card{background:var(--surf);border-radius:var(--r);box-shadow:var(--shadow);padding:1.2rem 1.4rem}
+.chart-title{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg2);margin-bottom:1rem}
+.chart-wrap{overflow-x:auto}
+.chart-wrap svg{display:block;width:100%;overflow:visible}
+
+/* Tooltip */
+.tip{
+  position:fixed;pointer-events:none;
+  background:var(--fg);color:var(--bg);
+  font-size:12px;font-weight:500;
+  padding:.35rem .65rem;border-radius:5px;
+  display:none;white-space:nowrap;z-index:100;
+  transform:translate(-50%,-110%);
+}
+
+/* ── Cards section ───────────────────────────────────────────── */
+.cards-section{max-width:1200px;margin:0 auto;padding:1rem 2rem 3rem}
+.filter-bar{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.1rem}
+.fil{
+  background:var(--surf);border:1.5px solid var(--rule);
+  color:var(--fg2);border-radius:20px;padding:.3rem .85rem;
+  font:600 12px/1 var(--fb);cursor:pointer;transition:all .15s;
+  letter-spacing:.03em;
+}
+.fil:hover{border-color:var(--gmid);color:var(--gmid)}
+.fil.active{background:var(--green);border-color:var(--green);color:#EEF7EC}
+
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+
+.card{
+  background:var(--surf);border-radius:var(--r);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;
+  transition:box-shadow .15s,opacity .2s,transform .2s;
+  overflow:hidden;
+}
+.card:hover{box-shadow:0 4px 8px rgba(0,0,0,.1),0 12px 28px rgba(0,0,0,.09);transform:translateY(-2px)}
+.card.hidden{display:none}
+
+.card-top{padding:1.1rem 1.2rem .9rem;display:flex;align-items:flex-start;gap:.8rem}
+.avatar{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:15px;font-weight:700;
+  flex-shrink:0;
+}
+.card-names{flex:1;min-width:0}
+.card-name{font-family:var(--fd);font-size:16px;font-weight:700;line-height:1.2;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-alt{font-size:11px;color:var(--fg3);display:block;margin-top:.1rem}
+.year-chip{
+  background:var(--glight);color:var(--green);
+  font-size:11px;font-weight:700;border-radius:4px;
+  padding:.15rem .45rem;flex-shrink:0;align-self:start;
+}
+
+.card-body{padding:0 1.2rem .9rem;display:flex;flex-direction:column;gap:.6rem;flex:1}
+
+.card-row{display:flex;align-items:baseline;gap:.4rem}
+.card-row .lbl{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);flex-shrink:0}
+.card-row .val{font-size:12.5px;color:var(--fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-row .val a{color:var(--green);text-decoration:none}
+.card-row .val a:hover{text-decoration:underline}
+
+.price-range{
+  display:flex;align-items:center;gap:.35rem;
+  background:var(--alight);border-radius:6px;
+  padding:.4rem .7rem;margin-top:.1rem;
+}
+.price-range .pv{font-size:15px;font-weight:700;color:var(--amber);font-family:var(--fd)}
+.price-range .sep{color:var(--fg3);font-size:13px}
+.price-range .pv2{font-size:13px;font-weight:600;color:var(--fg2)}
+.price-nd{font-size:12px;color:var(--fg3);font-style:italic;padding:.4rem .7rem;background:var(--surf2);border-radius:6px;margin-top:.1rem}
+
+.tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.1rem}
+.tag{background:var(--surf2);border:1px solid var(--rule);color:var(--fg2);font-size:11px;border-radius:4px;padding:.1rem .45rem}
+
+.tour-badge{background:var(--glight);color:var(--green);font-size:11px;font-weight:700;border-radius:4px;padding:.15rem .45rem}
+
+.card-footer{
+  padding:.75rem 1.2rem;
+  border-top:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:.5rem;
+}
+.card-footer .cf-owner{font-size:11.5px;color:var(--fg2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-link{
+  background:var(--glight);color:var(--green);
+  border:none;border-radius:6px;
+  padding:.3rem .65rem;font:600 11.5px/1 var(--fb);cursor:pointer;
+  text-decoration:none;white-space:nowrap;flex-shrink:0;
+  transition:background .12s;
+}
+.card-link:hover{background:var(--gmid);color:#EEF7EC}
+.no-site{font-size:11px;color:var(--fg3);font-style:italic}
+
+/* ── Avatar palette ──────────────────────────────────────────── */
+.av1{background:#D4EBD0;color:#1C5016}
+.av2{background:#D0DEEC;color:#1A3F6B}
+.av3{background:#EDE0CF;color:#7A4A0A}
+.av4{background:#E0D0EC;color:#4A1E7A}
+.av5{background:#D0E9EC;color:#0A4A5A}
+.av6{background:#ECD0D0;color:#7A1A1A}
+.av7{background:#E4EBD0;color:#3A5A0A}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .av1{background:#162814;color:#72D462}
+  :root:not([data-theme="light"]) .av2{background:#141E2E;color:#5A9EDB}
+  :root:not([data-theme="light"]) .av3{background:#2A1E08;color:#D4962A}
+  :root:not([data-theme="light"]) .av4{background:#1E1428;color:#9A6EDB}
+  :root:not([data-theme="light"]) .av5{background:#0E2228;color:#4ABAC8}
+  :root:not([data-theme="light"]) .av6{background:#280E0E;color:#DB7070}
+  :root:not([data-theme="light"]) .av7{background:#1C2408;color:#9ABC4A}
+}
+:root[data-theme="dark"] .av1{background:#162814;color:#72D462}
+:root[data-theme="dark"] .av2{background:#141E2E;color:#5A9EDB}
+:root[data-theme="dark"] .av3{background:#2A1E08;color:#D4962A}
+:root[data-theme="dark"] .av4{background:#1E1428;color:#9A6EDB}
+:root[data-theme="dark"] .av5{background:#0E2228;color:#4ABAC8}
+:root[data-theme="dark"] .av6{background:#280E0E;color:#DB7070}
+:root[data-theme="dark"] .av7{background:#1C2408;color:#9ABC4A}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media(max-width:900px){
+  .charts-row{grid-template-columns:1fr}
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .hero{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .kpi-row,.charts-row,.cards-section,.kpi-row{padding-inline:1rem}
+  .hero{padding:2rem 1rem 1.6rem}
+  .cards{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ── Sources ─────────────────────────────────────────────────── */
+.sources-bar{background:var(--surf);border-top:1px solid var(--rule);padding:.9rem 2rem;font-size:11.5px;color:var(--fg3)}
+.sources-bar a{color:var(--green);text-decoration:none}
+.sources-bar a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-left">
+    <p class="eye">Ленинградская область · Северо-Запад России</p>
+    <h1>Сидерии Ленинградской области</h1>
+    <p>Полный справочник производителей крафтового и натурального сидра — адреса, цены, экскурсии, основатели</p>
+    <div class="hero-badges">
+      <span class="hero-badge">7 производителей</span>
+      <span class="hero-badge">Регион-лидер по сидру в РФ (2024)</span>
+      <span class="hero-badge">Данные: октябрь 2026</span>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()">◐ Тема</button>
+</header>
+
+<!-- KPI -->
+<div class="kpi-row">
+  <div class="kpi"><span class="kpi-icon">🍎</span><span class="kpi-val">7</span><span class="kpi-label">Производителей в ЛО</span></div>
+  <div class="kpi"><span class="kpi-icon">📅</span><span class="kpi-val">2012</span><span class="kpi-label">Год первой сидрерии</span></div>
+  <div class="kpi"><span class="kpi-icon">💰</span><span class="kpi-val">190₽</span><span class="kpi-label">Минимальная цена за бутылку</span></div>
+  <div class="kpi"><span class="kpi-icon">🚶</span><span class="kpi-val">4</span><span class="kpi-label">Сидерий с экскурсиями</span></div>
+</div>
+
+<!-- CHARTS -->
+<div class="charts-row">
+
+  <div class="chart-card">
+    <div class="chart-title">Хронология основания</div>
+    <div class="chart-wrap" id="timeline-wrap">
+      <svg id="timeline-svg" height="170"></svg>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Ценовой диапазон (₽ / бутылка)</div>
+    <div class="chart-wrap" id="price-wrap">
+      <svg id="price-svg"></svg>
+    </div>
+  </div>
+
+</div>
+
+<!-- Tooltip -->
+<div class="tip" id="tip"></div>
+
+<!-- CARDS -->
+<section class="cards-section">
+  <div class="filter-bar" id="filter-bar">
+    <button class="fil active" data-f="all">Все</button>
+    <button class="fil" data-f="tour">С экскурсиями</button>
+    <button class="fil" data-f="site">Есть сайт</button>
+    <button class="fil" data-f="phone">Есть телефон</button>
+    <button class="fil" data-f="price">Есть цены</button>
+  </div>
+
+  <div class="cards" id="cards-grid">
+    <!-- rendered by JS -->
+  </div>
+</section>
+
+<div class="sources-bar">
+  <strong>Источники:</strong>
+  <a href="https://rus-normandy.ru" target="_blank">rus-normandy.ru</a> ·
+  <a href="https://bullevie.ru" target="_blank">bullevie.ru</a> ·
+  <a href="http://andreevcider.ru" target="_blank">andreevcider.ru</a> ·
+  <a href="https://onthebones.ru" target="_blank">onthebones.ru</a> ·
+  <a href="https://cidermill.pro" target="_blank">cidermill.pro</a> ·
+  <a href="https://www.shcider.com" target="_blank">shcider.com</a> ·
+  <a href="https://winestyle.ru" target="_blank">winestyle.ru</a> ·
+  <a href="https://cidrology.ru/proizvoditeli/" target="_blank">cidrology.ru</a>
+</div>
+
+<script>
+/* ── Data ─────────────────────────────────────────────────────── */
+const D = [
+  {
+    id:1, av:'BU', avc:'av1',
+    name:'Bullevie', alt:'ООО «Крафтье»',
+    district:'Тосненский р-н',
+    addr:'дер. Фёдоровское, ул. Промышленная, 19/3',
+    site:'bullevie.ru', phone:'+7 (812) 363-47-79',
+    owner:'Тихомиров Д.А.', ownerRole:'Генеральный директор',
+    founded:2015, priceMin:190, priceMax:500, tourPrice:2100,
+    tags:['шампанизация','до 26 чел.','2 часа'],
+    desc:'Крупнейшее производство ЛО. Экскурсии с дегустацией 5 сидров + сабраж.',
+    hasTour:true, hasPhone:true, hasSite:true
+  },
+  {
+    id:2, av:'РН', avc:'av2',
+    name:'Русская Нормандия', alt:'ООО «Русская Нормандия»',
+    district:'Лужский р-н',
+    addr:'д. Брод, ул. Новая, 2',
+    site:'rus-normandy.ru', phone:'+7 985 226-98-29',
+    owner:'Шиманов А.А.', ownerRole:'Основатель',
+    founded:2012, priceMin:356, priceMax:831, tourPrice:null,
+    tags:['сад 22 га','13 тыс. деревьев','MCA-2024'],
+    desc:'Победитель MCA-2024. 20 000 л/год. Флагман — «Святой Домкрат».',
+    hasTour:false, hasPhone:true, hasSite:true
+  },
+  {
+    id:3, av:'ФС', avc:'av3',
+    name:'Фабрика сидра', alt:'Cider Mill · ООО',
+    district:'Приозерский р-н',
+    addr:'с.п. Петровское, ПЗ Петровский, зд. 2',
+    site:'cidermill.pro', phone:'+7 (981) 288-8943',
+    owner:'Казанцев М.А.', ownerRole:'Гендиректор, совладелец',
+    founded:2023, priceMin:null, priceMax:null, tourPrice:null,
+    tags:['семейное','пуаре','молодое пр-во'],
+    desc:'Семейная сидродельня Казанцевых. Сидр и пуаре. Осн. в 2023 г.',
+    hasTour:false, hasPhone:true, hasSite:true
+  },
+  {
+    id:4, av:'AC', avc:'av4',
+    name:'Andreev Ciderworks', alt:'Андреев Сайдерворкс',
+    district:'Всеволожский р-н',
+    addr:'дер. Мистолово, ул. Зеленодольская, 14',
+    site:'andreevcider.ru', phone:null,
+    owner:'Андреев Олег', ownerRole:'Основатель, мастер-сидродел',
+    founded:2016, priceMin:750, priceMax:1690, tourPrice:0,
+    tags:['премиум','пуаре','экскурсии по анонсу'],
+    desc:'Авторское производство. Яблоки из ЛО и Псковской обл. Ice Cider.',
+    hasTour:true, hasPhone:false, hasSite:true
+  },
+  {
+    id:5, av:'ТС', avc:'av5',
+    name:'Токсовская Сидрерия', alt:'Toksovo Cidrerie · On the Bones',
+    district:'г. Пушкин',
+    addr:'пос. Тярлево, Московское ш., 22/24',
+    site:'onthebones.ru', phone:'+7 904 550-02-00',
+    owner:'Белецкий А., Шмолдаев К., Яруничев А.', ownerRole:'Три сооснователя',
+    founded:2012, priceMin:340, priceMax:2190, tourPrice:2900,
+    tags:['трансфер вкл.','3.5 часа','эксперименты'],
+    desc:'Выросло из дачного производства в Токсово. Экскурсия 2900 ₽, трансфер включён.',
+    hasTour:true, hasPhone:true, hasSite:true
+  },
+  {
+    id:6, av:'CR', avc:'av6',
+    name:"Cidre'Rhino", alt:'Сидрерино',
+    district:'Волосовский р-н',
+    addr:'адрес по записи',
+    site:null, phone:null,
+    owner:'—', ownerRole:'не раскрывается',
+    founded:2019, priceMin:null, priceMax:null, tourPrice:0,
+    tags:['шампенуа','спонтанное бр.','пюпитры 1950-х'],
+    desc:'Единственный в России классический méthode champenoise на спонтанном брожении. Выдержка 1.5–2 года.',
+    hasTour:true, hasPhone:false, hasSite:false
+  },
+  {
+    id:7, av:'SH', avc:'av7',
+    name:'Sh.cider', alt:'Царскосельская Сидрерия · «Сидр Ш»',
+    district:'ЛО (сырьё)',
+    addr:'адрес производства не публичный',
+    site:'shcider.com', phone:null,
+    owner:'—', ownerRole:'не раскрывается',
+    founded:2020, priceMin:300, priceMax:790, tourPrice:null,
+    tags:['дикие яблоки','дикие дрожжи','Vintage 2022'],
+    desc:'Линейка «ДИЧЬ» — дикие яблоки ЛО, дикие дрожжи, выдержка 2 года на осадке.',
+    hasTour:false, hasPhone:false, hasSite:true
+  }
+];
+
+/* ── Theme toggle ─────────────────────────────────────────────── */
+function toggleTheme(){
+  const r = document.documentElement;
+  const cur = r.getAttribute('data-theme');
+  if(cur === 'dark') r.setAttribute('data-theme','light');
+  else if(cur === 'light') r.removeAttribute('data-theme');
+  else r.setAttribute('data-theme','dark');
+  drawCharts();
+}
+
+/* ── Helpers ──────────────────────────────────────────────────── */
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim() }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;') }
+
+/* ── Timeline Chart ───────────────────────────────────────────── */
+function drawTimeline(){
+  const wrap = document.getElementById('timeline-wrap');
+  const W = wrap.offsetWidth || 400;
+  const H = 200;
+  const PAD = {l:16, r:16};
+  const xMin = 2011.3, xMax = 2024.3;
+  const lineY = 104; // axis line Y position
+  const OFFSET = 34; // dots for shared-year are ±OFFSET from lineY
+  const xScale = x => PAD.l + (x - xMin)/(xMax - xMin) * (W - PAD.l - PAD.r);
+
+  const fg2  = cssVar('--fg2');
+  const fg3  = cssVar('--fg3');
+  const green = cssVar('--green');
+  const surf = cssVar('--surf');
+  const rule = cssVar('--rule');
+
+  // Pre-pass: count how many cideries share each year, assign sequence index
+  const sorted = [...D].sort((a,b) => a.founded - b.founded || a.id - b.id);
+  const yearCount = {};
+  const yearSeq   = {};
+  sorted.forEach(c => {
+    yearCount[c.founded] = (yearCount[c.founded] || 0) + 1;
+    yearSeq[c.id] = yearCount[c.founded]; // 1-based within year group
+  });
+
+  // Assign above/below for each entry.
+  // Shared-year: first → above, second → below.
+  // Single-year: alternate across the whole sorted list to avoid neighbours colliding.
+  let toggle = true;
+  const above = {}; // true = label & dot go above the axis
+  sorted.forEach(c => {
+    if(yearCount[c.founded] > 1){
+      above[c.id] = yearSeq[c.id] === 1;
+    } else {
+      above[c.id] = toggle;
+      toggle = !toggle;
+    }
+  });
+
+  const dotY = c =>
+    yearCount[c.founded] > 1
+      ? lineY + (above[c.id] ? -OFFSET : OFFSET)
+      : lineY;
+
+  let html = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // axis line
+  html += `<line x1="${PAD.l}" y1="${lineY}" x2="${W-PAD.r}" y2="${lineY}" stroke="${rule}" stroke-width="1.5"/>`;
+
+  // year ticks + labels at the very bottom
+  [2012,2015,2016,2019,2020,2023].forEach(y => {
+    const x = xScale(y);
+    html += `<line x1="${x}" y1="${lineY-3}" x2="${x}" y2="${lineY+3}" stroke="${fg3}" stroke-width="1"/>`;
+    html += `<text x="${x}" y="${H-5}" text-anchor="middle" font-family="Inter,system-ui" font-size="10" fill="${fg3}">${y}</text>`;
+  });
+
+  // Dots and labels
+  sorted.forEach(c => {
+    const x  = xScale(c.founded);
+    const dy = dotY(c);
+    const isAbove = above[c.id];
+    // label sits 13px above dot (if above) or 19px below dot (if below)
+    const labelY = isAbove ? dy - 13 : dy + 19;
+
+    // dashed connector for offset dots
+    if(yearCount[c.founded] > 1){
+      html += `<line x1="${x}" y1="${lineY}" x2="${x}" y2="${dy}"
+        stroke="${rule}" stroke-width="1" stroke-dasharray="3,2"/>`;
+    }
+
+    // dot ring
+    html += `<circle cx="${x}" cy="${dy}" r="6" fill="${green}"
+      class="tl-dot" data-name="${esc(c.name)}" data-yr="${c.founded}"
+      style="cursor:pointer"/>`;
+    html += `<circle cx="${x}" cy="${dy}" r="3" fill="${surf}"/>`;
+
+    // label — truncate to 14 chars
+    const label = c.name.length > 14 ? c.name.slice(0,13)+'…' : c.name;
+    html += `<text x="${x}" y="${labelY}"
+      text-anchor="middle"
+      font-family="Inter,system-ui" font-size="9.5" font-weight="600"
+      fill="${fg2}">${esc(label)}</text>`;
+  });
+
+  html += `</svg>`;
+  wrap.innerHTML = html;
+
+  // tooltips
+  const tip = document.getElementById('tip');
+  wrap.querySelectorAll('.tl-dot').forEach(el => {
+    el.addEventListener('mouseenter', e => {
+      tip.textContent = e.target.dataset.name + ' — ' + e.target.dataset.yr;
+      tip.style.display = 'block';
+    });
+    el.addEventListener('mousemove', e => {
+      tip.style.left = e.clientX + 'px';
+      tip.style.top  = e.clientY + 'px';
+    });
+    el.addEventListener('mouseleave', () => { tip.style.display = 'none' });
+  });
+}
+
+/* ── Price Range Chart ────────────────────────────────────────── */
+function drawPrice(){
+  const wrap = document.getElementById('price-wrap');
+  const svg  = document.getElementById('price-svg');
+  const W = wrap.offsetWidth || 500;
+  const ROW_H = 38;
+  const PAD = {l:156, r:58, t:8, b:24};
+  const H = D.length * ROW_H + PAD.t + PAD.b;
+  const MAX_PRICE = 2300;
+
+  const fg  = cssVar('--fg');
+  const fg2 = cssVar('--fg2');
+  const fg3 = cssVar('--fg3');
+  const green = cssVar('--green');
+  const gmid = cssVar('--gmid');
+  const amber = cssVar('--amber');
+  const rule = cssVar('--rule');
+  const surf2 = cssVar('--surf2');
+
+  const xScale = v => PAD.l + v / MAX_PRICE * (W - PAD.l - PAD.r);
+
+  // sort: with price first, then without
+  const sorted = [...D].sort((a,b) => {
+    if(a.priceMin === null && b.priceMin !== null) return 1;
+    if(a.priceMin !== null && b.priceMin === null) return -1;
+    return a.priceMin - b.priceMin;
+  });
+
+  let html = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // grid lines at 500, 1000, 1500, 2000
+  [500,1000,1500,2000].forEach(v => {
+    const x = xScale(v);
+    if(x < W - PAD.r){
+      html += `<line x1="${x}" y1="${PAD.t}" x2="${x}" y2="${H - PAD.b}" stroke="${rule}" stroke-width="1" stroke-dasharray="3,3"/>`;
+      html += `<text x="${x}" y="${H-6}" text-anchor="middle" font-family="Inter,system-ui" font-size="9.5" fill="${fg3}">${v}₽</text>`;
+    }
+  });
+
+  // baseline
+  html += `<line x1="${PAD.l}" y1="${H-PAD.b}" x2="${W-PAD.r}" y2="${H-PAD.b}" stroke="${rule}" stroke-width="1"/>`;
+
+  sorted.forEach((c, i) => {
+    const y = PAD.t + i * ROW_H + ROW_H / 2;
+
+    // name label
+    const nameShort = c.name.length > 18 ? c.name.slice(0,17)+'…' : c.name;
+    html += `<text x="${PAD.l-8}" y="${y+4}" text-anchor="end" font-family="Inter,system-ui" font-size="11" font-weight="500" fill="${fg2}">${esc(nameShort)}</text>`;
+
+    if(c.priceMin !== null){
+      const x1 = xScale(c.priceMin);
+      const x2 = xScale(c.priceMax);
+      // track bg
+      html += `<rect x="${PAD.l}" y="${y-3}" width="${W-PAD.l-PAD.r}" height="6" rx="3" fill="${rule}" opacity=".35"/>`;
+      // range bar
+      html += `<rect x="${x1}" y="${y-4}" width="${Math.max(x2-x1,4)}" height="8" rx="4" fill="${gmid}" class="pr-bar" data-name="${esc(c.name)}" data-min="${c.priceMin}" data-max="${c.priceMax}" style="cursor:pointer"/>`;
+      // min dot
+      html += `<circle cx="${x1}" cy="${y}" r="4.5" fill="${green}"/>`;
+      // max dot
+      html += `<circle cx="${x2}" cy="${y}" r="5.5" fill="${amber}"/>`;
+      // max label
+      html += `<text x="${x2+9}" y="${y+4}" font-family="Inter,system-ui" font-size="10.5" font-weight="700" fill="${amber}">${c.priceMax}₽</text>`;
+    } else {
+      // no price
+      html += `<line x1="${PAD.l}" y1="${y}" x2="${PAD.l+60}" y2="${y}" stroke="${rule}" stroke-width="2" stroke-dasharray="4,3"/>`;
+      html += `<text x="${PAD.l+68}" y="${y+4}" font-family="Inter,system-ui" font-size="10.5" fill="${fg3}" font-style="italic">цена не указана</text>`;
+    }
+  });
+
+  html += `</svg>`;
+  wrap.innerHTML = html;
+  wrap.style.overflowX = 'auto';
+
+  // tooltip
+  const tip = document.getElementById('tip');
+  wrap.querySelectorAll('.pr-bar').forEach(el => {
+    el.addEventListener('mouseenter', e => {
+      const t = e.target;
+      tip.textContent = `${t.dataset.name}: ${t.dataset.min}₽ — ${t.dataset.max}₽`;
+      tip.style.display = 'block';
+    });
+    el.addEventListener('mousemove', e => {
+      tip.style.left = e.clientX + 'px';
+      tip.style.top  = e.clientY + 'px';
+    });
+    el.addEventListener('mouseleave', () => { tip.style.display = 'none' });
+  });
+}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+function renderCards(){
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = D.map(c => {
+    const priceHtml = c.priceMin !== null
+      ? `<div class="price-range">
+           <span class="pv">от ${c.priceMin}₽</span>
+           <span class="sep">→</span>
+           <span class="pv2">до ${c.priceMax}₽</span>
+         </div>`
+      : `<div class="price-nd">Цена не указана — уточнять у производителя</div>`;
+
+    const tourHtml = (c.hasTour && c.tourPrice)
+      ? `<span class="tour-badge">🎟 Экскурсия ${c.tourPrice}₽</span>`
+      : c.hasTour
+      ? `<span class="tour-badge">🎟 Экскурсии по записи</span>`
+      : '';
+
+    const siteHtml = c.site
+      ? `<a class="card-link" href="https://${c.site}" target="_blank">${c.site}</a>`
+      : `<span class="no-site">Сайт не публикуется</span>`;
+
+    const phoneHtml = c.phone
+      ? `<div class="card-row"><span class="lbl">Тел</span><span class="val">${c.phone}</span></div>`
+      : '';
+
+    const distHtml = c.district !== 'ЛО (сырьё)'
+      ? `<div class="card-row"><span class="lbl">Р-н</span><span class="val">${c.district}</span></div>`
+      : `<div class="card-row"><span class="lbl">Р-н</span><span class="val">ЛО — сырьё отсюда</span></div>`;
+
+    return `
+    <div class="card" data-tour="${c.hasTour}" data-site="${c.hasSite}" data-phone="${c.hasPhone}" data-price="${c.priceMin !== null}">
+      <div class="card-top">
+        <div class="avatar ${c.avc}">${c.av}</div>
+        <div class="card-names">
+          <span class="card-name">${esc(c.name)}</span>
+          <span class="card-alt">${esc(c.alt)}</span>
+        </div>
+        <span class="year-chip">${c.founded}</span>
+      </div>
+      <div class="card-body">
+        ${distHtml}
+        <div class="card-row"><span class="lbl">Адрес</span><span class="val" title="${esc(c.addr)}">${esc(c.addr)}</span></div>
+        <div class="card-row"><span class="lbl">Осн.</span><span class="val">${esc(c.owner)}</span></div>
+        ${phoneHtml}
+        ${priceHtml}
+        ${tourHtml ? '<div style="margin-top:.1rem">'+tourHtml+'</div>' : ''}
+        <div class="tags">${c.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+      </div>
+      <div class="card-footer">
+        <span class="cf-owner">${esc(c.ownerRole)}</span>
+        ${siteHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Filter ───────────────────────────────────────────────────── */
+function initFilters(){
+  document.getElementById('filter-bar').addEventListener('click', e => {
+    const btn = e.target.closest('.fil');
+    if(!btn) return;
+    document.querySelectorAll('.fil').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.f;
+    document.querySelectorAll('.card').forEach(card => {
+      const show =
+        f === 'all'   ? true :
+        f === 'tour'  ? card.dataset.tour  === 'true' :
+        f === 'site'  ? card.dataset.site  === 'true' :
+        f === 'phone' ? card.dataset.phone === 'true' :
+        f === 'price' ? card.dataset.price === 'true' : true;
+      card.classList.toggle('hidden', !show);
+    });
+  });
+}
+
+/* ── Draw / Redraw ────────────────────────────────────────────── */
+function drawCharts(){
+  drawTimeline();
+  drawPrice();
+}
+
+let _resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(drawCharts, 120);
+});
+
+renderCards();
+initFilters();
+drawCharts();
+</script>
+</body>
+</html>
